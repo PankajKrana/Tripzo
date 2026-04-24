@@ -52,14 +52,31 @@ struct SignupScreen: View {
                 Text("Or Connect")
                 
                 HStack(spacing: 20) {
-                    ForEach(0..<3) { _ in
-                        Circle()
-                            .stroke()
-                            .frame(width: 60, height: 60)
-                    }
-                }
-                
 
+                    // Google
+                    SocialLoginButton(
+                        iconName: "google_icon",
+                        isSystemImage: false,
+                        backgroundColor: Color(.systemBackground),
+                        iconColor: nil
+                    ) { }
+
+                    // Apple (IMPORTANT FIX)
+                    SocialLoginButton(
+                        iconName: "applelogo",
+                        isSystemImage: true,
+                        backgroundColor: .black,
+                        iconColor: .white
+                    ) { }
+
+                    // Facebook
+                    SocialLoginButton(
+                        iconName: "facebook_icon",
+                        isSystemImage: false,
+                        backgroundColor: Color(red: 24/255, green: 119/255, blue: 242/255),
+                        iconColor: nil
+                    ) { }
+                }
             }
             .padding(.horizontal, 20)
             .toolbar {
