@@ -7,93 +7,145 @@
 
 import SwiftUI
 
-struct SignupScreen: View {
-    @State private var email: String = ""
-    @State private var password: String = ""
-    @State private var name: String = ""
-    @Environment(\.dismiss) private var dismiss
+import SwiftUI
 
+struct SignupScreen: View {
+    
+    @State private var name = ""
+    @State private var email = ""
+    @State private var password = ""
+    
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
         NavigationStack {
-            VStack(spacing: 25) {
-                
-                
-                Text("Sign up now")
-                    .font(.custom("AveriaSerifLibre-BoldItalic", size: 30))
-                    .multilineTextAlignment(.center)
-                
-                Text("Please fill the details to create account ")
-                    .font(.system(size: 15))
-                    .multilineTextAlignment(.center)
-                
-                UserName(placeholder: "Full Name", text: $name)
-                
-                EmailField(placeholder: "Email", text: $email)
-                
-                PasswordField(placeholder: "Password", text: $password)
-                
-                Button("Forgot password?") {
-                    print("Forgot tapped")
+            ScrollView {
+                VStack(spacing: 28) {
+                    
+                    header
+                    
+                    form
+                    
+                    actions
+                    
+                    socialSection
+                    
+                    Spacer(minLength: 20)
                 }
-                .foregroundStyle(.blue)
-                
-                CustomButton(title: "Sign up") {
-                    print("Sign in tapped")
-                }
-                
-                HStack {
-                    Text("Already have an account?")
-                    Text("Sign up")
-                        .foregroundStyle(.blue)
-                }
-                
-                Divider()
-                
-                Text("Or Connect")
-                
-                HStack(spacing: 20) {
-
-                    // Google
-                    SocialLoginButton(
-                        iconName: "google_icon",
-                        isSystemImage: false,
-                        backgroundColor: Color(.systemBackground),
-                        iconColor: nil
-                    ) { }
-
-                    // Apple (IMPORTANT FIX)
-                    SocialLoginButton(
-                        iconName: "applelogo",
-                        isSystemImage: true,
-                        backgroundColor: .black,
-                        iconColor: .white
-                    ) { }
-
-                    // Facebook
-                    SocialLoginButton(
-                        iconName: "facebook_icon",
-                        isSystemImage: false,
-                        backgroundColor: Color(red: 24/255, green: 119/255, blue: 242/255),
-                        iconColor: nil
-                    ) { }
-                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
             }
-            .padding(.horizontal, 20)
+            .scrollIndicators(.hidden)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    
-                    Button {
-                        dismiss()
-                    } label: {
+                    Button { dismiss() } label: {
                         Image(systemName: "chevron.left")
-                        
                     }
-                    
                 }
             }
         }
     }
+    
+    var isValid: Bool {
+        !name.isEmpty &&
+        email.contains("@") &&
+        password.count >= 6
+    }
 }
+
+
+extension SignupScreen {
+    private var header: some View {
+        VStack(spacing: 10) {
+            
+            Text("Create Account")
+                .font(.system(size: 30, weight: .bold, design: .serif))
+            
+            Text("Fill your details to get started")
+                .font(.subheadline)
+                .foregroundStyle(.gray)
+        }
+    }
+    
+    private var form: some View {
+        VStack(spacing: 16) {
+            
+            CustomTextField(
+                placeholder: "Full Name",
+                text: $name
+            )
+            
+            CustomTextField(
+                placeholder: "Email",
+                text: $email
+            )
+            
+            CustomTextField(
+                placeholder: "Password",
+                text: $password,
+                isSecure: true
+            )
+        }
+    }
+    private var actions: some View {
+        VStack(spacing: 16) {
+            
+            CustomButton(title: "Sign Up") {
+                print("Sign up tapped")
+            }
+            
+            HStack(spacing: 4) {
+                Text("Already have an account?")
+                
+                Button("Sign in") {
+                    dismiss() // or navigate
+                }
+                .foregroundStyle(.blue)
+            }
+            .font(.footnote)
+        }
+    }
+    
+    private var socialSection: some View {
+        VStack(spacing: 16) {
+            
+            HStack {
+                Rectangle().frame(height: 1).opacity(0.2)
+                Text("Or Connect")
+                    .font(.footnote)
+                    .foregroundStyle(.gray)
+                Rectangle().frame(height: 1).opacity(0.2)
+            }
+            
+            HStack(spacing: 20) {
+                
+                SocialLoginButton(
+                    iconName: "google_icon",
+                    isSystemImage: false,
+                    backgroundColor: Color(.systemBackground),
+                    iconColor: nil
+                ) {}
+                
+                SocialLoginButton(
+                    iconName: "applelogo",
+                    isSystemImage: true,
+                    backgroundColor: .black,
+                    iconColor: .white
+                ) {}
+                
+                SocialLoginButton(
+                    iconName: "facebook_icon",
+                    isSystemImage: false,
+                    backgroundColor: Color(red: 24/255, green: 119/255, blue: 242/255),
+                    iconColor: nil
+                ) {}
+            }
+        }
+    }
+}
+
+
 
 #Preview {
     SignupScreen()
