@@ -7,41 +7,49 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct SignupScreen: View {
+    let onBackToSignIn: () -> Void
     
     @State private var name = ""
     @State private var email = ""
     @State private var password = ""
+    @State private var isLoading = false
+    @State private var errorMessage = ""
+    @State private var infoMessage = ""
     
-    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var authManager: AuthManager
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 28) {
-                    
-                    header
-                    
-                    form
-                    
-                    actions
-                    
-                    socialSection
-                    
-                    Spacer(minLength: 20)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 20)
-                .padding(.top, 10)
+        ScrollView {
+            VStack(spacing: 28) {
+                
+                header
+                
+                form
+                
+                actions
+                
+                socialSection
+                
+                Spacer(minLength: 20)
             }
-            .scrollIndicators(.hidden)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button { dismiss() } label: {
-                        Image(systemName: "chevron.left")
-                    }
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
+        }
+        .navigationBarBackButtonHidden()
+        .scrollIndicators(.hidden)
+        .alert("Sign Up Failed", isPresented: .constant(!errorMessage.isEmpty)) {
+            Button("OK") {
+                errorMessage = ""
+            }
+        } message: {
+            Text(errorMessage)
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: onBackToSignIn) {
+                    Image(systemName: "chevron.left")
                 }
             }
         }
@@ -80,6 +88,12 @@ extension SignupScreen {
                 placeholder: "Email",
                 text: $email
             )
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled(true)
+            .keyboardType(.emailAddress)
+            .onChange(of: email) { _, newValue in
+                email = newValue.lowercased()
+            }
             
             CustomTextField(
                 placeholder: "Password",
@@ -92,18 +106,26 @@ extension SignupScreen {
         VStack(spacing: 16) {
             
             CustomButton(title: "Sign Up") {
-                print("Sign up tapped")
+                Task { await handleSignUp() }
             }
+            .disabled(!isValid || isLoading)
             
             HStack(spacing: 4) {
                 Text("Already have an account?")
                 
                 Button("Sign in") {
-                    dismiss() // or navigate
+                    onBackToSignIn()
                 }
                 .foregroundStyle(.blue)
             }
             .font(.footnote)
+
+            if !infoMessage.isEmpty {
+                Text(infoMessage)
+                    .font(.footnote)
+                    .foregroundStyle(.green)
+                    .multilineTextAlignment(.center)
+            }
         }
     }
     
@@ -145,8 +167,40 @@ extension SignupScreen {
     }
 }
 
+private extension SignupScreen {
+    func handleSignUp() async {
+        errorMessage = ""
+        infoMessage = ""
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            let signedInImmediately = try await authManager.signUp(
+                name: name.trimmingCharacters(in: .whitespacesAndNewlines),
+                email: email.trimmingCharacters(in: .whitespacesAndNewlines),
+                password: password
+            )
+
+            if !signedInImmediately {
+                infoMessage = "Account created. Check your email to verify, then sign in."
+            }
+        } catch {
+            errorMessage = friendlyErrorMessage(from: error)
+        }
+    }
+
+    func friendlyErrorMessage(from error: Error) -> String {
+        let raw = error.localizedDescription.lowercased()
+        if raw.contains("invalid login credentials") {
+            return "Invalid email or password. Please try again."
+        }
+        return error.localizedDescription
+    }
+}
+
 
 
 #Preview {
-    SignupScreen()
+    SignupScreen(onBackToSignIn: {})
+        .environmentObject(AuthManager())
 }

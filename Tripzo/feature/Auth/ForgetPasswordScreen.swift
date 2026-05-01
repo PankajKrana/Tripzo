@@ -7,39 +7,33 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct ForgetPasswordScreen: View {
+    let onBack: () -> Void
     
     @State private var email: String = ""
-    @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 28) {
-                    
-                    Spacer(minLength: 40)
-                    
-                    header
-                    
-                    form
-                    
-                    actionButton
-                    
-                    Spacer()
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 20)
+        ScrollView {
+            VStack(spacing: 28) {
+                
+                Spacer(minLength: 40)
+                
+                header
+                
+                form
+                
+                actionButton
+                
+                Spacer()
             }
-            .scrollIndicators(.hidden)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                    }
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 20)
+        }
+        .scrollIndicators(.hidden)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: onBack) {
+                    Image(systemName: "chevron.left")
                 }
             }
         }
@@ -78,5 +72,5 @@ extension ForgetPasswordScreen {
     }
 }
 #Preview {
-    ForgetPasswordScreen()
+    ForgetPasswordScreen(onBack: {})
 }
