@@ -8,36 +8,39 @@
 import SwiftUI
 
 struct SigninScreen: View {
-    
+    let onShowSignup: () -> Void
+    let onShowForgotPassword: () -> Void
+
     @State private var email = ""
     @State private var password = ""
-    @Environment(\.dismiss) private var dismiss
+    @State private var isLoading = false
+    @State private var errorMessage = ""
+    @EnvironmentObject private var authManager: AuthManager
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 28) {
-                    
-                    header
-                    
-                    form
-                    
-                    actions
-                    
-                    socialSection
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 20)
-                .padding(.top, 10)
+        ScrollView {
+            VStack(spacing: 28) {
+                
+                header
+                
+                form
+                
+                actions
+                
+                socialSection
             }
-            .scrollIndicators(.hidden)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button { dismiss() } label: {
-                        Image(systemName: "chevron.left")
-                    }
-                }
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
+        }
+        .navigationBarBackButtonHidden()
+        .scrollIndicators(.hidden)
+        .alert("Sign In Failed", isPresented: .constant(!errorMessage.isEmpty)) {
+            Button("OK") {
+                errorMessage = ""
             }
+        } message: {
+            Text(errorMessage)
         }
     }
 }
@@ -62,6 +65,12 @@ extension SigninScreen {
                 placeholder: "Email",
                 text: $email
             )
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled(true)
+            .keyboardType(.emailAddress)
+            .onChange(of: email) { _, newValue in
+                email = newValue.lowercased()
+            }
             
             CustomTextField(
                 placeholder: "Password",
@@ -77,18 +86,23 @@ extension SigninScreen {
             
             HStack {
                 Spacer()
-                Button("Forgot password?") {}
+                Button("Forgot password?") {
+                    onShowForgotPassword()
+                }
                     .font(.footnote)
                     .foregroundStyle(.blue)
             }
             
-            CustomButton(title: "Sign In") {
-                print("Sign in tapped")
+            CustomButton(title: isLoading ? "Signing In..." : "Sign In") {
+                Task { await handleSignIn() }
             }
+            .disabled(isLoading || email.isEmpty || password.isEmpty)
             
             HStack(spacing: 4) {
                 Text("Don't have an account?")
-                Button("Sign up") {}
+                Button("Sign up") {
+                    onShowSignup()
+                }
                     .foregroundStyle(.blue)
             }
             .font(.footnote)
@@ -134,6 +148,32 @@ extension SigninScreen {
     
 }
 
+private extension SigninScreen {
+    func handleSignIn() async {
+        errorMessage = ""
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            try await authManager.signIn(
+                email: email.trimmingCharacters(in: .whitespacesAndNewlines),
+                password: password
+            )
+        } catch {
+            errorMessage = friendlyErrorMessage(from: error)
+        }
+    }
+
+    func friendlyErrorMessage(from error: Error) -> String {
+        let raw = error.localizedDescription.lowercased()
+        if raw.contains("invalid login credentials") {
+            return "Invalid email or password. Please try again."
+        }
+        return error.localizedDescription
+    }
+}
+
 #Preview {
-    SigninScreen()
+    SigninScreen(onShowSignup: {}, onShowForgotPassword: {})
+        .environmentObject(AuthManager())
 }

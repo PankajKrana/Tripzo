@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>SUPABASE_ANON_KEY</key>
+	<string>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJua2xqYml4eWhubG1ydGJ1Y2RwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2MjY4MDMsImV4cCI6MjA5MzIwMjgwM30.zPPyDgSu5TWo9QEcDFA4fJdbbqwgiKVS55yxoSkswzM</string>
+	<key>SUPABASE_URL</key>
+	<string>https://rnkljbixyhnlmrtbucdp.supabase.co</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Rye-Regular.ttf</string>
