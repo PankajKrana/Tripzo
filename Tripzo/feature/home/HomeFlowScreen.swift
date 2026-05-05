@@ -8,17 +8,11 @@
 import SwiftUI
 
 struct HomeFlowScreen: View {
-    @State private var path: [Route] = []
-
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack {
             CustomTabScreen()
         }
     }
-}
-
-private extension HomeFlowScreen {
-    enum Route: Hashable {}
 }
 
 #Preview {

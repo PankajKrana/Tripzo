@@ -67,8 +67,15 @@ extension ForgetPasswordScreen {
     
     private var actionButton: some View {
         CustomButton(title: "Reset Password") {
-            print("Reset tapped")
+            Task {
+                await handlePasswordReset()
+            }
         }
+    }
+    
+    private func handlePasswordReset() async {
+        // TODO: Implement password reset functionality with Supabase
+        print("Password reset requested for: \(email)")
     }
 }
 #Preview {
