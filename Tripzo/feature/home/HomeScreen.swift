@@ -7,28 +7,24 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct HomeScreen: View {
     
     var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: 24) {
-                
-                topBar
-                
-                Text("Explore the\nBeautiful world!")
-                    .font(.system(size: 34, weight: .semibold, design: .serif))
-                    .minimumScaleFactor(0.8)
-                
-                dividerText
-                
-                cardCarousel
-                
-                Spacer()
-            }
-            .safeAreaPadding()
+        VStack(alignment: .leading, spacing: 24) {
+            
+            topBar
+            
+            Text("Explore the\nBeautiful world!")
+                .font(.system(size: 34, weight: .semibold, design: .serif))
+                .minimumScaleFactor(0.8)
+            
+            dividerText
+            
+            cardCarousel
+            
+            Spacer()
         }
+        .safeAreaPadding()
     }
 }
 
@@ -82,6 +78,7 @@ extension HomeScreen {
                             Image(systemName: "bell")
                         }
                 }
+                .accessibilityLabel("Notifications")
             }
         }
     
@@ -105,7 +102,7 @@ struct DestinationCard: View {
         ZStack(alignment: .bottom) {
             
             // Background Image
-            Image(.onbording1)
+            Image("onbording1")
                 .resizable()
                 .scaledToFill()
                 .frame(height: 400)

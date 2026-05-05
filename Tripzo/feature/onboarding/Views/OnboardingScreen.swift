@@ -86,9 +86,6 @@ private struct OnboardingCard: View {
                 .scaledToFit()
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, 12)
-                .overlay {
-                    
-                }
 
             Spacer(minLength: 28)
 

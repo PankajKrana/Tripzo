@@ -47,6 +47,16 @@ struct SigninScreen: View {
 
 
 extension SigninScreen {
+    private var isFormValid: Bool {
+        do {
+            try authManager.validate(email: email)
+            try authManager.validate(password: password)
+            return true
+        } catch {
+            return false
+        }
+    }
+
     private var header: some View {
         VStack(spacing: 10) {
             Text("Sign in now")
@@ -96,7 +106,7 @@ extension SigninScreen {
             CustomButton(title: isLoading ? "Signing In..." : "Sign In") {
                 Task { await handleSignIn() }
             }
-            .disabled(isLoading || email.isEmpty || password.isEmpty)
+            .disabled(isLoading || !isFormValid)
             
             HStack(spacing: 4) {
                 Text("Don't have an account?")

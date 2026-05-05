@@ -56,9 +56,16 @@ struct SignupScreen: View {
     }
     
     var isValid: Bool {
-        !name.isEmpty &&
-        email.contains("@") &&
-        password.count >= 6
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else { return false }
+
+        do {
+            try authManager.validate(email: email)
+            try authManager.validate(password: password)
+            return true
+        } catch {
+            return false
+        }
     }
 }
 

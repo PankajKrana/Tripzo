@@ -15,7 +15,7 @@ struct ProfileScreen: View {
             VStack(spacing: 15) {
                 Circle()
                     .fill(.gray.opacity(0.4))
-                    .frame(width: 140, height: 140, alignment: .center)
+                    .frame(width: 140, height: 140)
                     
                 Text("Alex")
                     .font(.title2)
@@ -28,9 +28,9 @@ struct ProfileScreen: View {
                 
                 
                 HStack {
-                    TableSection(text: "Reward Points", value: "123")
-                    TableSection(text: "Travel Trips", value: "123")
-                    TableSection(text: "Bucket List", value: "123")
+                    ProfileStatView(text: "Reward Points", value: "123")
+                    ProfileStatView(text: "Travel Trips", value: "123")
+                    ProfileStatView(text: "Bucket List", value: "123")
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.top, 20)
@@ -73,6 +73,7 @@ struct ProfileScreen: View {
                         Image(systemName: "chevron.left")
                         
                     }
+                    .accessibilityLabel("Back")
                 }
                 
                 ToolbarItem(placement: .principal) {
@@ -86,28 +87,12 @@ struct ProfileScreen: View {
                     } label: {
                         Image(systemName: "pencil.line")
                     }
+                    .accessibilityLabel("Edit Profile")
                 }
             }
         }
     }
 }
-
-
-extension ProfileScreen {
-    func TableSection(text: String, value: String) -> some View {
-        VStack(spacing: 4) {
-            Text(text)
-                .font(.caption)
-                .foregroundColor(.gray)
-            
-            Text(value)
-                .font(.headline)
-
-        }
-        .frame(maxWidth: .infinity)
-    }
-}
-
 
 struct ProfileRow: View {
     var icon: String
@@ -117,19 +102,36 @@ struct ProfileRow: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
                 .frame(width: 24)
 
             Text(title)
-                .foregroundColor(.primary)
+                .foregroundStyle(.primary)
 
             Spacer()
 
             Image(systemName: "chevron.right")
-                .foregroundColor(.gray)
+                .foregroundStyle(.gray)
                 .font(.system(size: 14, weight: .semibold))
         }
         .padding()
+    }
+}
+
+private struct ProfileStatView: View {
+    let text: String
+    let value: String
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(text)
+                .font(.caption)
+                .foregroundStyle(.gray)
+
+            Text(value)
+                .font(.headline)
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 #Preview {

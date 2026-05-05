@@ -41,6 +41,9 @@ final class AuthManager: ObservableObject {
             throw AuthManagerError.notConfigured(configurationError ?? "Supabase is not configured.")
         }
 
+        try validate(email: email)
+        try validate(password: password)
+
         try await client.auth.signIn(
             email: email,
             password: password
@@ -52,6 +55,9 @@ final class AuthManager: ObservableObject {
         guard let client else {
             throw AuthManagerError.notConfigured(configurationError ?? "Supabase is not configured.")
         }
+
+        try validate(email: email)
+        try validate(password: password)
 
         let response = try await client.auth.signUp(
             email: email,
@@ -70,6 +76,35 @@ final class AuthManager: ObservableObject {
         guard let client else { return }
         try await client.auth.signOut()
         isAuthenticated = false
+    }
+
+    func validate(email: String) throws {
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedEmail.isEmpty else {
+            throw AuthManagerError.invalidEmail("Email address is required.")
+        }
+
+        let emailRegex = #"^[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"#
+        let isValid = trimmedEmail.range(of: emailRegex, options: .regularExpression) != nil
+        guard isValid else {
+            throw AuthManagerError.invalidEmail("Please enter a valid email address.")
+        }
+    }
+
+    func validate(password: String) throws {
+        let trimmedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedPassword.isEmpty else {
+            throw AuthManagerError.invalidPassword("Password is required.")
+        }
+
+        guard trimmedPassword.count >= 8 else {
+            throw AuthManagerError.invalidPassword("Password must be at least 8 characters.")
+        }
+
+        let hasNumber = trimmedPassword.rangeOfCharacter(from: .decimalDigits) != nil
+        guard hasNumber else {
+            throw AuthManagerError.invalidPassword("Password must contain at least one number.")
+        }
     }
 }
 
@@ -101,10 +136,16 @@ private extension AuthManager {
 
 enum AuthManagerError: LocalizedError {
     case notConfigured(String)
+    case invalidEmail(String)
+    case invalidPassword(String)
 
     var errorDescription: String? {
         switch self {
         case .notConfigured(let message):
+            return message
+        case .invalidEmail(let message):
+            return message
+        case .invalidPassword(let message):
             return message
         }
     }
