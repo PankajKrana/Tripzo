@@ -14,11 +14,11 @@ struct CustomTabScreen: View {
                 HomeScreen()
             }
             Tab("Calendar", systemImage: "calendar") {
-                PlaceholderTabView(title: "Calendar")
+                CalendarTripsScreen()
             }
             
             Tab("Message", systemImage: "ellipsis.message") {
-                PlaceholderTabView(title: "Message")
+                MessagesScreen()
             }
             Tab("Profile", systemImage: "person") {
                 ProfileScreen()

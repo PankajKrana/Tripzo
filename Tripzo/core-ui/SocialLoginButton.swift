@@ -10,6 +10,7 @@ struct SocialLoginButton: View {
     let isSystemImage: Bool
     let backgroundColor: Color
     let iconColor: Color?
+    let label: String
     let action: () -> Void
 
     var body: some View {
@@ -34,5 +35,6 @@ struct SocialLoginButton: View {
                 }
             }
         }
+        .accessibilityLabel(label)
     }
 }
