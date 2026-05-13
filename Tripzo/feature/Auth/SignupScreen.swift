@@ -15,43 +15,77 @@ struct SignupScreen: View {
     @State private var password = ""
     @State private var isLoading = false
     @State private var errorMessage = ""
+    @State private var showError = false
     @State private var infoMessage = ""
+    @State private var showInfo = false
     
     @EnvironmentObject private var authManager: AuthManager
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 28) {
-                
-                header
-                
-                form
-                
-                actions
-                
-                socialSection
-                
-                Spacer(minLength: 20)
+        ZStack {
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    TripzoColors.primary.opacity(0.05),
+                    TripzoColors.surface
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
+            ScrollView {
+                VStack(spacing: TripzoSpacing.large) {
+                    
+                    header
+                        .slideAnimation(duration: 0.3)
+                    
+                    form
+                        .slideAnimation(duration: 0.4)
+                    
+                    actions
+                        .slideAnimation(duration: 0.5)
+                    
+                    socialSection
+                        .slideAnimation(duration: 0.6)
+                    
+                    Spacer(minLength: TripzoSpacing.large)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, TripzoSpacing.medium)
+                .padding(.top, TripzoSpacing.medium)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 20)
-            .padding(.top, 10)
+            .navigationBarBackButtonHidden()
+            .scrollIndicators(.hidden)
+
+            // Back button overlay
+            VStack {
+                HStack {
+                    Button(action: onBackToSignIn) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(TripzoColors.primary)
+                            .frame(width: 44, height: 44)
+                    }
+                    Spacer()
+                }
+                .padding(TripzoSpacing.medium)
+
+                Spacer()
+            }
         }
-        .navigationBarBackButtonHidden()
-        .scrollIndicators(.hidden)
-        .alert("Sign Up Failed", isPresented: .constant(!errorMessage.isEmpty)) {
+        .alert("Sign Up Failed", isPresented: $showError) {
             Button("OK") {
                 errorMessage = ""
             }
         } message: {
             Text(errorMessage)
         }
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(action: onBackToSignIn) {
-                    Image(systemName: "chevron.left")
-                }
+        .alert("Success", isPresented: $showInfo) {
+            Button("OK") {
+                infoMessage = ""
             }
+        } message: {
+            Text(infoMessage)
         }
     }
     
@@ -72,102 +106,139 @@ struct SignupScreen: View {
 
 extension SignupScreen {
     private var header: some View {
-        VStack(spacing: 10) {
-            
+        VStack(alignment: .leading, spacing: TripzoSpacing.small) {
             Text("Create Account")
-                .font(.system(size: 30, weight: .bold, design: .serif))
+                .font(.displaySmall)
+                .fontWeight(.bold)
             
-            Text("Fill your details to get started")
-                .font(.subheadline)
-                .foregroundStyle(.gray)
+            Text("Start planning your dream adventures today")
+                .font(.bodyMedium)
+                .foregroundStyle(TripzoColors.textSecondary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private var form: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: TripzoSpacing.medium) {
             
-            CustomTextField(
-                placeholder: "Full Name",
-                text: $name
-            )
-            
-            CustomTextField(
-                placeholder: "Email",
-                text: $email
-            )
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled(true)
-            .keyboardType(.emailAddress)
-            .onChange(of: email) { _, newValue in
-                email = newValue.lowercased()
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Full Name")
+                    .font(.labelMedium)
+                    .fontWeight(.semibold)
+                
+                CustomTextField(
+                    placeholder: "Enter your full name",
+                    text: $name
+                )
             }
             
-            CustomTextField(
-                placeholder: "Password",
-                text: $password,
-                isSecure: true
-            )
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Email")
+                    .font(.labelMedium)
+                    .fontWeight(.semibold)
+                
+                CustomTextField(
+                    placeholder: "Enter your email",
+                    text: $email
+                )
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled(true)
+                .keyboardType(.emailAddress)
+                .onChange(of: email) { _, newValue in
+                    email = newValue.lowercased()
+                }
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Password")
+                    .font(.labelMedium)
+                    .fontWeight(.semibold)
+                
+                CustomTextField(
+                    placeholder: "Create a strong password",
+                    text: $password,
+                    isSecure: true
+                )
+            }
         }
     }
+    
     private var actions: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: TripzoSpacing.medium) {
             
-            CustomButton(title: "Sign Up") {
-                Task { await handleSignUp() }
-            }
-            .disabled(!isValid || isLoading)
+            ModernButton(
+                title: isLoading ? "Creating Account..." : "Sign Up",
+                systemImage: isLoading ? nil : "checkmark",
+                action: { Task { await handleSignUp() } },
+                style: .primary,
+                isLoading: isLoading,
+                isEnabled: isValid
+            )
             
             HStack(spacing: 4) {
                 Text("Already have an account?")
+                    .font(.bodySmall)
                 
                 Button("Sign in") {
                     onBackToSignIn()
                 }
-                .foregroundStyle(.blue)
+                    .font(.bodySmall)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(TripzoColors.primary)
             }
-            .font(.footnote)
+            .frame(maxWidth: .infinity)
 
             if !infoMessage.isEmpty {
-                Text(infoMessage)
-                    .font(.footnote)
-                    .foregroundStyle(.green)
-                    .multilineTextAlignment(.center)
+                HStack(spacing: TripzoSpacing.small) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(TripzoColors.success)
+                    Text(infoMessage)
+                        .font(.bodySmall)
+                }
+                .padding(TripzoSpacing.small)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(TripzoColors.success.opacity(0.1))
+                .clipShape(RoundedRectangle(cornerRadius: TripzoSpacing.cornerRadiusMedium))
+                .transition(.slide.combined(with: .opacity))
             }
         }
     }
     
     private var socialSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: TripzoSpacing.medium) {
             
             HStack {
                 Rectangle().frame(height: 1).opacity(0.2)
-                Text("Or Connect")
-                    .font(.footnote)
-                    .foregroundStyle(.gray)
+                Text("Or sign up with")
+                    .font(.labelSmall)
+                    .foregroundStyle(TripzoColors.textSecondary)
                 Rectangle().frame(height: 1).opacity(0.2)
             }
             
-            HStack(spacing: 20) {
+            HStack(spacing: TripzoSpacing.medium) {
                 
                 SocialLoginButton(
                     iconName: "google_icon",
                     isSystemImage: false,
                     backgroundColor: Color(.systemBackground),
-                    iconColor: nil
+                    iconColor: nil,
+                    label: "Continue with Google"
                 ) {}
                 
                 SocialLoginButton(
                     iconName: "applelogo",
                     isSystemImage: true,
                     backgroundColor: .black,
-                    iconColor: .white
+                    iconColor: .white,
+                    label: "Continue with Apple"
                 ) {}
                 
                 SocialLoginButton(
                     iconName: "facebook_icon",
                     isSystemImage: false,
                     backgroundColor: Color(red: 24/255, green: 119/255, blue: 242/255),
-                    iconColor: nil
+                    iconColor: nil,
+                    label: "Continue with Facebook"
                 ) {}
             }
         }
@@ -190,9 +261,11 @@ private extension SignupScreen {
 
             if !signedInImmediately {
                 infoMessage = "Account created. Check your email to verify, then sign in."
+                showInfo = true
             }
         } catch {
             errorMessage = friendlyErrorMessage(from: error)
+            showError = true
         }
     }
 

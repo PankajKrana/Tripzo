@@ -15,27 +15,45 @@ struct SigninScreen: View {
     @State private var password = ""
     @State private var isLoading = false
     @State private var errorMessage = ""
+    @State private var showError = false
     @EnvironmentObject private var authManager: AuthManager
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 28) {
-                
-                header
-                
-                form
-                
-                actions
-                
-                socialSection
+        ZStack {
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    TripzoColors.primary.opacity(0.05),
+                    TripzoColors.surface
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
+            ScrollView {
+                VStack(spacing: TripzoSpacing.large) {
+                    header
+                        .slideAnimation(duration: 0.3)
+                    
+                    form
+                        .slideAnimation(duration: 0.4)
+                    
+                    actions
+                        .slideAnimation(duration: 0.5)
+                    
+                    socialSection
+                        .slideAnimation(duration: 0.6)
+
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, TripzoSpacing.medium)
+                .padding(.top, TripzoSpacing.large)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 20)
-            .padding(.top, 10)
+            .scrollIndicators(.hidden)
+            .navigationBarBackButtonHidden()
         }
-        .navigationBarBackButtonHidden()
-        .scrollIndicators(.hidden)
-        .alert("Sign In Failed", isPresented: .constant(!errorMessage.isEmpty)) {
+        .alert("Sign In Failed", isPresented: $showError) {
             Button("OK") {
                 errorMessage = ""
             }
@@ -44,7 +62,6 @@ struct SigninScreen: View {
         }
     }
 }
-
 
 extension SigninScreen {
     private var isFormValid: Bool {
@@ -58,104 +75,126 @@ extension SigninScreen {
     }
 
     private var header: some View {
-        VStack(spacing: 10) {
-            Text("Sign in now")
-                .font(.system(size: 30, weight: .bold, design: .serif))
+        VStack(alignment: .leading, spacing: TripzoSpacing.small) {
+            Text("Welcome Back")
+                .font(.displaySmall)
+                .fontWeight(.bold)
             
-            Text("Please sign in to continue our app")
-                .font(.subheadline)
-                .foregroundStyle(.gray)
+            Text("Sign in to continue planning your adventures")
+                .font(.bodyMedium)
+                .foregroundStyle(TripzoColors.textSecondary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private var form: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: TripzoSpacing.medium) {
             
-            CustomTextField(
-                placeholder: "Email",
-                text: $email
-            )
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled(true)
-            .keyboardType(.emailAddress)
-            .onChange(of: email) { _, newValue in
-                email = newValue.lowercased()
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Email")
+                    .font(.labelMedium)
+                    .fontWeight(.semibold)
+                
+                CustomTextField(
+                    placeholder: "Enter your email",
+                    text: $email
+                )
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled(true)
+                .keyboardType(.emailAddress)
+                .onChange(of: email) { _, newValue in
+                    email = newValue.lowercased()
+                }
             }
-            
-            CustomTextField(
-                placeholder: "Password",
-                text: $password,
-                isSecure: true
-            )
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Password")
+                        .font(.labelMedium)
+                        .fontWeight(.semibold)
+                    
+                    Spacer()
+                    
+                    Button(action: onShowForgotPassword) {
+                        Text("Forgot?")
+                            .font(.labelSmall)
+                            .foregroundStyle(TripzoColors.primary)
+                    }
+                }
+                
+                CustomTextField(
+                    placeholder: "Enter your password",
+                    text: $password,
+                    isSecure: true
+                )
+            }
         }
     }
     
-    
     private var actions: some View {
-        VStack(spacing: 16) {
-            
-            HStack {
-                Spacer()
-                Button("Forgot password?") {
-                    onShowForgotPassword()
-                }
-                    .font(.footnote)
-                    .foregroundStyle(.blue)
-            }
-            
-            CustomButton(title: isLoading ? "Signing In..." : "Sign In") {
-                Task { await handleSignIn() }
-            }
-            .disabled(isLoading || !isFormValid)
+        VStack(spacing: TripzoSpacing.medium) {
+            ModernButton(
+                title: isLoading ? "Signing In..." : "Sign In",
+                systemImage: isLoading ? nil : "arrow.right",
+                action: { Task { await handleSignIn() } },
+                style: .primary,
+                isLoading: isLoading,
+                isEnabled: isFormValid
+            )
             
             HStack(spacing: 4) {
                 Text("Don't have an account?")
+                    .font(.bodySmall)
                 Button("Sign up") {
                     onShowSignup()
                 }
-                    .foregroundStyle(.blue)
+                    .font(.bodySmall)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(TripzoColors.primary)
             }
-            .font(.footnote)
+            .frame(maxWidth: .infinity)
         }
     }
     
     private var socialSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: TripzoSpacing.medium) {
             
             HStack {
                 Rectangle().frame(height: 1).opacity(0.2)
-                Text("Or Connect")
-                    .font(.footnote)
-                    .foregroundStyle(.gray)
+                Text("Or sign in with")
+                    .font(.labelSmall)
+                    .foregroundStyle(TripzoColors.textSecondary)
                 Rectangle().frame(height: 1).opacity(0.2)
             }
             
-            HStack(spacing: 20) {
+            HStack(spacing: TripzoSpacing.medium) {
                 
                 SocialLoginButton(
                     iconName: "google_icon",
                     isSystemImage: false,
                     backgroundColor: Color(.systemBackground),
-                    iconColor: nil
+                    iconColor: nil,
+                    label: "Continue with Google"
                 ) {}
                 
                 SocialLoginButton(
                     iconName: "applelogo",
                     isSystemImage: true,
                     backgroundColor: .black,
-                    iconColor: .white
+                    iconColor: .white,
+                    label: "Continue with Apple"
                 ) {}
                 
                 SocialLoginButton(
                     iconName: "facebook_icon",
                     isSystemImage: false,
                     backgroundColor: Color(red: 24/255, green: 119/255, blue: 242/255),
-                    iconColor: nil
+                    iconColor: nil,
+                    label: "Continue with Facebook"
                 ) {}
             }
         }
     }
-    
 }
 
 private extension SigninScreen {
@@ -171,6 +210,7 @@ private extension SigninScreen {
             )
         } catch {
             errorMessage = friendlyErrorMessage(from: error)
+            showError = true
         }
     }
 
